@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Gallery">
+
+	<select id="count" resultType="int">
+		select count(*) from gallery
+	</select>
+	
+	<select id="main" resultType="gallery">
+		select *
+    	from(select rownum rnum, g.* 
+    		 from (select * from gallery 
+         		   order by gallery_id desc) g
+        )
+		where rnum &lt;= 6
+	</select>
+	
+	<select id="list" parameterType="java.util.Map" resultType="gallery">
+		select *
+    	from(select rownum rnum, g.* 
+    		 from (select * from gallery 
+         		   order by gallery_id desc) g
+        )
+		where rnum &gt;= #{start} and rnum &lt;= #{end}
+	</select>
+	
+	<select id="detail" parameterType="int" resultType="gallery">
+	   select * 
+	   from   gallery 
+	   where  gallery_id = #{number}
+	</select>
+	
+	<insert id="insert" parameterType="gallery">
+		<selectKey resultType="int" order="BEFORE" keyProperty="gallery_id">
+			select nvl(max(gallery_id), 0) + 1 from gallery
+		</selectKey>
+		insert into gallery
+		(gallery_id, user_id, photo, title, area)
+		values 
+		(#{gallery_id}, #{user_id}, #{photo, jdbcType=VARCHAR}, #{title}, #{area})
+	</insert>
+	
+	<update id="modify" parameterType="gallery">
+		update gallery 
+		set title = #{title},  
+			area = #{area}, 
+			photo = #{photo, jdbcType=VARCHAR} 
+		where gallery_id = #{gallery_id} 
+	</update>
+	
+	<delete id="delete" parameterType="gallery">
+		delete from gallery 
+		where gallery_id = #{gallery_id}
+	</delete>
+	
+	<select id="my" parameterType="java.util.Map" resultType="gallery">
+		select *
+    	from(select rownum rnum, g.* 
+    		 from (select * from gallery 
+         		   order by gallery_id desc) g
+        )
+		where rnum &gt;= #{start} and rnum &lt;= #{end} 
+		and user_id = #{user_id}
+	</select>
+	
+	<select id="mycount" parameterType="map" resultType="int">
+		select count(*) from gallery
+		where user_id = #{user_id}
+	</select>
+	
+
+</mapper>
